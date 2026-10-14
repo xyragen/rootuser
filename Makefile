@@ -22,14 +22,20 @@ debug: | build $(OBJDIR)
 	$(CC) $(DBGFLAGS) -c src/rous.c -o $(OBJDIR)/rous.o
 	$(CC) $(DBGFLAGS) -c src/main.c -o $(OBJDIR)/main.o
 	$(CC) $(DBGFLAGS) $(ROUS_OBJ) -o build/rous
-test: build/rous build/test_rouspath build/test_ruenv
+test: build/rous build/test_rouspath build/test_ruenv build/test_rusys build/test_ruauth
 	./build/test_rouspath
 	./build/test_ruenv
+	./build/test_rusys
+	./build/test_ruauth
 	sh tests/run.sh
 build/test_rouspath: tests/test_rouspath.c $(LIB_OBJ) | build
 	$(CC) $(CFLAGS) tests/test_rouspath.c $(LIB_OBJ) -o $@
 build/test_ruenv: tests/test_ruenv.c $(LIB_OBJ) | build
 	$(CC) $(CFLAGS) tests/test_ruenv.c $(LIB_OBJ) -o $@
+build/test_rusys: tests/test_rusys.c $(LIB_OBJ) | build
+	$(CC) $(CFLAGS) tests/test_rusys.c $(LIB_OBJ) -o $@
+build/test_ruauth: tests/test_ruauth.c $(LIB_OBJ) | build
+	$(CC) $(CFLAGS) tests/test_ruauth.c $(LIB_OBJ) -o $@
 install: all
 	install -d $(DESTDIR)$(SBINDIR)
 	install -m 4755 build/rous $(DESTDIR)$(SBINDIR)/rous

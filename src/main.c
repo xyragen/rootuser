@@ -7,13 +7,18 @@
 
 int main(int argc, char **argv) {
   const char *user = 0;
+  const char *username = "root";
   const char *home = "/root";
   char userhome[256];
   char path[ROUS_PATH_MAX];
   char *env[ROUS_ENV_MAX];
+  gid_t groups[ROUS_GRP_MAX];
+  ru_ids_t ids;
   const char *term;
   uid_t uid = 0;
   gid_t gid = 0;
+  uid_t ruid;
+  int ngroups = 0;
   int ai = 1;
   long rc;
 
@@ -47,8 +52,14 @@ int main(int argc, char **argv) {
     return 1;
   }
 
+  ruid = (uid_t)ru_getuid();
   if (ru_geteuid() != 0) {
     fprintf(stderr, "%s: not privileged, install with owner root and mode 4755\n", ROUS_NAME);
+    return 1;
+  }
+
+  if (!ru_authorized(ruid)) {
+    fprintf(stderr, "%s: user %ld is not authorized to use rous\n", ROUS_NAME, (long)ruid);
     return 1;
   }
 
@@ -57,22 +68,33 @@ int main(int argc, char **argv) {
       fprintf(stderr, "%s: unknown user %s\n", ROUS_NAME, user);
       return 1;
     }
+    username = user;
     home = userhome;
+    ngroups = ru_user_groups(user, gid, groups, ROUS_GRP_MAX);
+    if (ngroups < 0) {
+      fprintf(stderr, "%s: cannot resolve groups for %s\n", ROUS_NAME, user);
+      return 1;
+    }
   }
 
-  if (ru_find_in_path(argv[ai], getenv("PATH"), path, sizeof(path)) != 0) {
+  if (ru_find_in_path(argv[ai], path, sizeof(path)) != 0) {
     fprintf(stderr, "%s: command not found: %s\n", ROUS_NAME, argv[ai]);
     return 127;
   }
 
   term = getenv("TERM");
-  if (ru_build_env(env, ROUS_ENV_MAX, term, home) < 0) {
+  if (ru_build_env(env, ROUS_ENV_MAX, term, home, username) < 0) {
     fprintf(stderr, "%s: cannot build environment\n", ROUS_NAME);
     return 1;
   }
 
+  ids.grouplist = groups;
+  ids.uid = uid;
+  ids.gid = gid;
+  ids.ngroups = ngroups;
+
   argv[ai] = path;
-  rc = ru_run(path, &argv[ai], env, uid, gid);
+  rc = ru_run(path, &argv[ai], env, &ids);
   if (rc != 0) {
     if (rc < 0) rc = -rc;
     fprintf(stderr, "%s: %s: %s\n", ROUS_NAME, path, strerror((int)rc));
@@ -80,3 +102,4 @@ int main(int argc, char **argv) {
   }
   return 0;
 }
+
