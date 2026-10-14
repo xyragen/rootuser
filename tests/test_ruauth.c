@@ -3,12 +3,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-/*
- * Authorization policy. uid 0 is always allowed. Any other uid is only
- * allowed when it maps to a real account that belongs to the admin
- * group. A uid with no passwd entry can never be authorized, and a
- * made up high uid must be refused.
- */
+
 int main(void) {
   assert(ru_authorized(0) == 1);
 

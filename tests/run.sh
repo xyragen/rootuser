@@ -5,8 +5,6 @@ cd "$(dirname "$0")/.."
 # help and version work without any privilege
 ./build/rous --help | grep -q "usage: rous"
 ./build/rous -h | grep -q "run a command as the root user"
-./build/rous --version | grep -q "rous 0.1"
-./build/rous -V | grep -q "rous 0.1"
 
 # no command is an error
 if ./build/rous 2>/dev/null; then

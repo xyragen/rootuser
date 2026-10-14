@@ -11,21 +11,13 @@ void ru_usage(FILE *out) {
   fprintf(out, "run a command as the root user\n\n");
   fprintf(out, "  -u, --user <name>  run as this user instead of root\n");
   fprintf(out, "  -h, --help         show this help\n");
-  fprintf(out, "  -V, --version      show version\n\n");
+
   fprintf(out, "examples:\n");
   fprintf(out, "  %s pacman -S neovim\n", ROUS_NAME);
   fprintf(out, "  %s -u nobody id\n", ROUS_NAME);
 }
 
-/*
- * Authorization policy. rous is installed setuid root, so before it
- * touches any identity it decides whether the real caller may use it.
- * Root is always allowed. Any other user must be a member of the admin
- * group, ROUS_ADMIN_GROUP, which defaults to wheel. Everything else is
- * refused. This is checked against the real uid, independent of the
- * command that is about to run, so the policy cannot be bypassed by the
- * command path.
- */
+
 int ru_authorized(uid_t ruid) {
   struct passwd *pw;
   struct group *gr;
@@ -43,15 +35,7 @@ int ru_authorized(uid_t ruid) {
   return 0;
 }
 
-/*
- * Resolve a bare command name against the trusted search path. A name
- * that already contains a slash is used verbatim. No caller supplied
- * PATH is consulted, so the search order cannot be influenced from the
- * environment. Each candidate is built with a bounded snprintf and the
- * component is rejected outright when it would not fit rather than being
- * truncated, so a long or malformed entry can never produce a shortened
- * path that points somewhere unintended.
- */
+
 int ru_find_in_path(const char *cmd, char *out, size_t outn) {
   const char *p;
   if (!cmd || !*cmd || !out || outn == 0) return -1;
@@ -78,12 +62,7 @@ int ru_find_in_path(const char *cmd, char *out, size_t outn) {
   return -1;
 }
 
-/*
- * Build the environment handed to the child. The identity variables
- * reflect the target account, not the caller, so USER, LOGNAME, and HOME
- * all name the account the command will run as. TERM is copied through
- * when the caller supplied one so interactive tools keep working.
- */
+
 int ru_build_env(char **env, int max, const char *term, const char *home, const char *user) {
   static char homebuf[256];
   static char userbuf[256];
@@ -121,12 +100,7 @@ int ru_lookup_user(const char *name, uid_t *uid, gid_t *gid, char *home, size_t 
   return 0;
 }
 
-/*
- * Load the full supplementary group list for a target account so the
- * child runs with the same group membership it would get from a normal
- * login, rather than an empty set. Returns the count written, or -1 when
- * the account is unknown or the list does not fit.
- */
+
 int ru_user_groups(const char *name, gid_t base_gid, gid_t *out, int max) {
   struct passwd *pw;
   int n = max;

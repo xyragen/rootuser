@@ -8,7 +8,6 @@ extern "C" {
 #endif
 
 #define ROUS_NAME "rous"
-#define ROUS_VERSION "0.1"
 
 #define ROUS_PATH_MAX 4096
 #define ROUS_ENV_MAX 16
@@ -20,11 +19,7 @@ extern "C" {
 
 #define ROUS_TRUSTED_PATH "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
-/*
- * Target identity handed to the assembly core. Field order is fixed so
- * the raw syscall code can read it by offset; the static asserts below
- * lock the layout in at compile time.
- */
+
 typedef struct {
   const gid_t *grouplist;
   uid_t uid;

@@ -26,9 +26,6 @@ int main(int argc, char **argv) {
     if (strcmp(argv[ai], "-h") == 0 || strcmp(argv[ai], "--help") == 0) {
       ru_usage(stdout);
       return 0;
-    } else if (strcmp(argv[ai], "-V") == 0 || strcmp(argv[ai], "--version") == 0) {
-      printf("%s %s\n", ROUS_NAME, ROUS_VERSION);
-      return 0;
     } else if (strcmp(argv[ai], "-u") == 0 || strcmp(argv[ai], "--user") == 0) {
       if (ai + 1 >= argc) {
         fprintf(stderr, "%s: -u needs a user name\n", ROUS_NAME);
