@@ -23,11 +23,11 @@ ru_run:
 	mov $116, %eax
 	syscall
 
-	mov %r8, %rdi
+	mov (%rsp), %rdi
 	mov $106, %eax
 	syscall
 
-	mov %rcx, %rdi
+	mov 8(%rsp), %rdi
 	mov $105, %eax
 	syscall
 
